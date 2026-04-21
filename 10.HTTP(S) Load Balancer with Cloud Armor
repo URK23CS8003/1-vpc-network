@@ -1,0 +1,236 @@
+10. HTTP(S) Load Balancer with Cloud Armor
+Deploy an HTTP(S) Load Balancer and configure a Cloud Armor security policy to
+protect backend services from unauthorized access (2).
+Elastic Google Cloud Infrastructure: Scaling and Automation
+Lab: Configure an application load balancer with autoscaling
+
+
+✅ 10. HTTP(S) Load Balancer with Cloud Armor (Step-by-Step)
+
+🎯 Goal:
+
+Create HTTP Load Balancer
+Configure Managed Instance Groups (MIG) with autoscaling
+Add Cloud Armor security policy to protect backend
+🔹 Step 0: Start Lab
+Click Start Lab
+Open Google Cloud Console
+Login with lab credentials
+Accept terms → Skip 2FA
+🔹 Step 1: Create Firewall Rule (Health Check)
+
+Go to:
+
+VPC Network → Firewall
+Click Create Firewall Rule
+Enter:
+Name: fw-allow-health-checks
+Network: default
+Target tags: allow-health-checks
+
+Source IPv4 ranges:
+
+130.211.0.0/22
+35.191.0.0/16
+Protocols: tcp:80
+Click Create
+
+✅ Allows Google health checks
+
+🔹 Step 2: Create Cloud NAT
+
+Go to:
+
+Network Services → Cloud NAT
+Click Get Started
+Configure:
+NAT Name: nat-config
+Network: default
+Region: (Lab Region)
+Click Create new router
+Name: nat-router
+Click Create
+
+⏳ Wait until status = Running
+
+🔹 Step 3: Create Web Server VM
+
+Go to:
+
+Compute Engine → VM Instances
+Click Create Instance
+Configure:
+Name: webserver
+Region/Zone: Lab values
+Network tag: allow-health-checks
+External IP: None
+Click Create
+🔸 Install Apache
+Click SSH
+Run:
+sudo apt-get update
+sudo apt-get install -y apache2
+sudo service apache2 start
+Enable auto start:
+sudo update-rc.d apache2 enable
+Test:
+curl localhost
+🔹 Step 4: Create Custom Image
+
+Go to:
+
+Compute Engine → VM Instances
+Select VM → Click Delete (keep disk)
+
+Go to:
+
+Compute Engine → Images
+Click Create Image
+Enter:
+Name: mywebserver
+Source: Disk → webserver
+Click Create
+🔹 Step 5: Create Instance Template
+
+Go to:
+
+Compute Engine → Instance Templates
+Click Create Template
+Configure:
+Name: mywebserver-template
+Machine: e2-micro
+Boot disk: Custom image → mywebserver
+Network tag: allow-health-checks
+External IP: None
+Click Create
+🔹 Step 6: Create Health Check
+
+Go to:
+
+Compute Engine → Health Checks
+Click Create
+Enter:
+Name: http-health-check
+Protocol: TCP
+Port: 80
+Click Create
+🔹 Step 7: Create Managed Instance Groups (MIG)
+👉 MIG 1
+
+Go to:
+
+Compute Engine → Instance Groups
+Click Create
+Configure:
+Name: us-1-mig
+Template: mywebserver-template
+Region: Region 1
+Autoscaling:
+Min: 1
+Max: 2
+CPU/HTTP LB: 80%
+Health check: http-health-check
+Click Create
+👉 MIG 2
+
+Repeat same:
+
+Name: notus-1-mig
+Region: Region 2
+🔹 Step 8: Create HTTP Load Balancer
+
+Go to:
+
+Network Services → Load Balancing
+Click Create Load Balancer
+Choose:
+Application Load Balancer
+External
+Global
+🔸 Frontend Config
+Protocol: HTTP
+IP: Ephemeral
+Port: 80
+🔸 Backend Config
+Create backend:
+Name: http-backend
+Add:
+us-1-mig
+notus-1-mig
+Port: 80
+Health check: http-health-check
+Enable logging
+🔸 Finalize
+Name: http-lb
+Click Create
+
+⏳ Wait for IP
+
+🔹 Step 9: Test Load Balancer
+Open:
+http://<LOAD_BALANCER_IP>
+You should see:
+👉 Apache default page
+🔹 Step 10: Stress Test
+Create VM:
+Name: stress-test
+SSH → run:
+ab -n 500000 -c 1000 http://<LB_IP>/
+
+👉 Observe:
+
+Traffic distributed
+Autoscaling triggered
+🔹 Step 11: Configure Cloud Armor (IMPORTANT)
+
+👉 This is the security part (extra for your question)
+
+Go to:
+
+Network Security → Cloud Armor
+Click Create Security Policy
+Enter:
+Name: block-policy
+Add Rule:
+Priority: 1000
+
+Condition:
+
+IP Address = (your test IP or deny all)
+Action: Deny (403)
+Save
+🔸 Attach to Backend
+
+Go to:
+
+Load Balancer → Backend Service
+Edit backend
+
+Attach:
+
+Security Policy → block-policy
+Save
+🔹 Step 12: Verify Cloud Armor
+Try accessing LB again
+If blocked → shows 403 Forbidden
+
+✅ Protection working
+
+🎯 Key Concepts (Exam Important)
+Load Balancer distributes traffic globally
+MIG provides autoscaling
+Health check ensures instance health
+Cloud NAT allows outbound traffic
+Cloud Armor protects from attacks (DDoS, IP block)
+📌 Architecture Flow
+User → Load Balancer → Backend (MIG) → VM
+                  ↓
+             Cloud Armor
+⚡ Final Summary
+
+✔ Firewall → Allow health check
+✔ NAT → Outbound internet
+✔ VM → Apache server
+✔ Image → Template → MIG
+✔ Load Balancer → Traffic distribution
+✔ Cloud Armor → Security
