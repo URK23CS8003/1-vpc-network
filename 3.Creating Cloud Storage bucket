@@ -1,0 +1,158 @@
+🧪 PART 1: Create Cloud Storage Bucket & Upload Image
+✅ Step 1: Open Cloud Shell
+Click Activate Cloud Shell (top right)
+✅ Step 2: Set Location
+
+Choose one:
+
+export LOCATION=ASIA
+✅ Step 3: Create Bucket (Unique Name)
+gcloud storage buckets create -l $LOCATION gs://$DEVSHELL_PROJECT_ID
+
+✔️ Bucket created using your project ID
+
+✅ Step 4: Download Image
+gcloud storage cp gs://cloud-training/gcpfci/my-excellent-blog.png my-excellent-blog.png
+✅ Step 5: Upload Image to Bucket
+gcloud storage cp my-excellent-blog.png gs://$DEVSHELL_PROJECT_ID/
+✅ Step 6: Make Image Public
+gsutil acl ch -u allUsers:R gs://$DEVSHELL_PROJECT_ID/my-excellent-blog.png
+🔁 Step 7: Configure Lifecycle Rule (IMPORTANT)
+
+👉 Go to:
+
+Cloud Storage → Buckets
+Click your bucket
+Go to Lifecycle → Add rule
+Configure:
+Condition: Age = 30 days
+Action: Change storage class → Nearline
+
+✔️ Save
+
+🎯 Result
+Object moves from Standard → Nearline after 30 days
+🧪 PART 2: Create Web Server VM
+✅ Step 8: Create VM
+
+Go to Compute Engine → VM instances → Create
+
+Configure:
+Name: bloghost
+Machine: e2-standard-2
+OS: Debian 12
+✔ Enable Allow HTTP traffic
+✅ Step 9: Add Startup Script
+
+Paste:
+
+#!/bin/bash
+apt-get install apache2 php php-mysql -y
+service apache2 restart
+
+Click Create
+
+✅ Step 10: Note IPs
+Copy External IP
+Copy Internal IP
+🧪 PART 3: Create Cloud SQL Database
+✅ Step 11: Create SQL Instance
+
+Go to Cloud SQL → Create Instance
+
+Configure:
+Engine: MySQL
+Instance ID: blog-db
+Password: Passw0rd1!
+Region/Zone: same as VM
+Edition: Enterprise → Sandbox
+✅ Step 12: Enable Public Access
+Go to Connections → Networking
+Click Add Network
+
+Enter:
+
+Name: web-server
+Network: <VM external IP>/32
+
+Click Save
+
+✅ Step 13: Create User
+Go to Users → Add user
+Username: blogdbuser
+Password: Passw0rd1!
+🧪 PART 4: Connect VM to Cloud SQL
+✅ Step 14: SSH into VM
+gcloud compute ssh bloghost
+✅ Step 15: Create PHP File
+cd /var/www/html
+sudo nano index.php
+
+Paste:
+
+<html>
+<body>
+<h1>My Blog</h1>
+<?php
+$dbserver = "CLOUDSQLIP";
+$dbuser = "blogdbuser";
+$dbpassword = "Passw0rd1!";
+
+try {
+$conn = new PDO("mysql:host=$dbserver;dbname=mysql", $dbuser, $dbpassword);
+echo "Connected successfully";
+} catch(PDOException $e) {
+echo "Connection failed: " . $e->getMessage();
+}
+?>
+</body>
+</html>
+✅ Step 16: Replace Values
+Replace CLOUDSQLIP with your SQL Public IP
+✅ Step 17: Restart Apache
+sudo service apache2 restart
+✅ Step 18: Test
+
+Open browser:
+
+http://<VM-External-IP>/index.php
+
+✔️ Output: Connected successfully
+
+🧪 PART 5: Display Image from Cloud Storage
+✅ Step 19: Get Image URL
+Go to Cloud Storage → Bucket
+Copy Public URL of image
+✅ Step 20: Edit PHP File
+sudo nano /var/www/html/index.php
+
+Add above <h1>:
+
+<img src='YOUR_IMAGE_URL'>
+Give feedback
+✅ Step 21: Restart Server
+sudo service apache2 restart
+✅ Step 22: Verify
+
+Reload:
+
+http://<VM-IP>/index.php
+
+✔️ You will see:
+
+Image
+Blog title
+Database connection message
+🎯 FINAL OUTPUT
+
+✔ Cloud Storage bucket created
+✔ Image uploaded & public
+✔ Lifecycle rule → Nearline after 30 days
+✔ VM with Apache + PHP
+✔ Cloud SQL connected
+✔ Image displayed on webpage
+
+⚡ Quick Viva Answer (2–3 Marks)
+
+Lifecycle Rule:
+Automatically changes storage class (Standard → Nearline) after 30 days to reduce cost.
