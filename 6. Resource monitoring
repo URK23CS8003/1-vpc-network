@@ -1,0 +1,149 @@
+6. Resource monitoring
+Build an instance template and deploy a Managed Instance Group (MIG). Set the
+Autoscaling policy to trigger at 60% CPU usage (4).
+Activity 4: Essential Google Cloud Infrastructure: Core Services
+Lab: Resource monitoring
+✅ STEP-BY-STEP PROCEDURE
+🔹 Step 1: Start Lab & Login
+Click Start Lab
+Open Google Cloud Console
+Login using given:
+Username
+Password
+Accept terms → Skip recovery options
+🔹 Step 2: Verify VM Resources
+Go to:
+👉 Compute Engine → VM Instances
+Check these 3 VMs exist:
+nginxstack-1
+nginxstack-2
+nginxstack-3
+
+✅ These will be used for monitoring
+
+🔹 Step 3: Open Cloud Monitoring
+Go to:
+👉 Navigation Menu → View All Products → Monitoring
+Monitoring workspace opens automatically
+🔹 Step 4: Create Custom Dashboard
+Click Dashboards
+Click Create Custom Dashboard
+Click New Dashboard
+Enter name:
+👉 My Dashboard
+➤ Add Chart (CPU Utilization)
+Click Add Widget
+Select Line Chart
+Enter:
+Title: My Chart
+Click Select Metric
+Search: CPU utilization
+
+Select:
+
+VM Instance → Instance → CPU utilization
+Click Apply
+(Optional) Add filter:
+Click Add Filter
+Explore options
+Click Apply
+
+✅ Dashboard created
+
+🔹 Step 5: Use Metrics Explorer (Optional)
+Click Metrics Explorer
+Try selecting:
+Resource: VM Instance
+Metric: CPU utilization
+
+👉 Used to analyze metrics without dashboard
+
+🔹 Step 6: Create Alerting Policy
+➤ First Condition
+Go to Alerting
+Click + Create Policy
+Click Select Metric
+
+Choose:
+
+VM Instance → CPU usage
+Set:
+Rolling window: 1 min
+Threshold: Above 20
+Click Next
+➤ Second Condition
+Click + Add Condition
+
+Select:
+
+VM Instance → CPU utilization
+Set:
+Rolling window: 1 min
+Threshold: Above 20
+Click Next
+➤ Multi-condition Rule
+Select:
+👉 All conditions are met
+➤ Add Notification
+Click Manage Notification Channels
+Add:
+Email address
+Display name
+Save
+Go back → Refresh
+Select your email
+➤ Finalize
+Alert Name: My Alert Policy
+Click Create Policy
+
+✅ Alert created
+
+🔹 Step 7: Create Resource Group
+Go to Monitoring → Groups
+Click + Create Group
+Enter:
+Field	Value
+Name	VM instances
+Criteria	Contains → nginx
+Click Done → Create
+
+✅ Group created (includes all nginx VMs)
+
+🔹 Step 8: Create Uptime Check
+Go to Monitoring → Uptime Checks
+Click + Create Uptime Check
+Enter:
+Field	Value
+Protocol	HTTP
+Resource Type	Instance
+Applies To	Group
+Group	VM instances
+Frequency	1 minute
+Click Continue
+➤ Add Notification
+Select your email notification
+➤ Finalize
+Title: My Uptime Check
+Click Test → Create
+
+✅ Uptime monitoring started
+
+🔹 Step 9: Disable Alert Policy
+Go to Monitoring → Alerting
+Click See All Policies
+Find:
+👉 My Alert Policy
+Toggle Enabled → OFF
+Click Turn Off
+
+✅ Alert disabled
+
+🔹 Step 10: Review
+
+You have successfully:
+✔ Created dashboard
+✔ Added charts
+✔ Created alert with 2 conditions
+✔ Created resource group
+✔ Configured uptime check
+✔ Disabled alert
