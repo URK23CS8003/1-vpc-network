@@ -1,0 +1,120 @@
+9. Folder-Level IAM and Policy Inheritance
+Launch a folder within your organization and assign IAM roles at the folder level to
+understand policy inheritance across projects.
+Activity 4: Essential Google Cloud Infrastructure: Core Services
+Lab: Examining billing data with bigquery, Lesson: Custom Roles
+
+
+✅ 9. Folder-Level IAM & Policy Inheritance (Step-by-Step)
+
+Goal:
+Create a Folder, assign IAM roles at folder level, and verify policy inheritance across projects.
+
+🔹 Step 0: Start Lab & Login
+Click Start Lab
+Open Google Cloud Console
+Login using lab credentials
+Accept terms → Skip 2FA → Continue
+🔹 Step 1: Open IAM & Resource Manager
+
+Go to:
+
+Navigation Menu ☰ → IAM & Admin → Manage Resources
+You will see:
+Organization (if available)
+Projects
+🔹 Step 2: Create a Folder
+Click + CREATE FOLDER
+Enter:
+Name: Test-Folder
+Under Organization, select your organization (if available)
+Click CREATE
+
+✅ Folder created successfully
+
+🔹 Step 3: Create a Project inside Folder
+
+Go to:
+
+Navigation Menu ☰ → IAM & Admin → Manage Resources
+Click + CREATE PROJECT
+Fill:
+Project Name: test-project-1
+Location → Select: Test-Folder
+Click CREATE
+
+👉 This ensures project is inside the folder
+
+🔹 Step 4: Assign IAM Role at Folder Level
+
+In Manage Resources, click your folder:
+
+Test-Folder
+Go to Permissions tab
+Click GRANT ACCESS
+Enter:
+New principal: (Test user email)
+
+Role:
+
+Viewer / Editor / Storage Object Viewer
+Click SAVE
+
+✅ Role assigned at folder level
+
+🔹 Step 5: Understand Policy Inheritance
+
+👉 Important concept:
+
+Folder → Project → Resource
+Permissions flow downward automatically
+
+So:
+
+Folder IAM → applies to all projects inside it
+🔹 Step 6: Verify Inheritance in Project
+
+Go to:
+
+IAM & Admin → IAM
+Select your project (test-project-1)
+Check IAM list:
+You will see the user added at folder level
+
+Role appears with:
+
+Inherited from: Folder
+
+✅ This confirms inheritance is working
+
+🔹 Step 7: Test Access (Optional but Recommended)
+Login as Test User
+Try accessing:
+Compute Engine
+Storage
+Verify:
+Access matches assigned role
+🔹 Step 8: Modify Role at Folder Level
+
+Go back to folder:
+
+Manage Resources → Test-Folder
+Edit role (e.g., Viewer → Editor)
+Save
+
+👉 Now go to project IAM → role automatically updated
+
+✅ Shows real-time inheritance
+
+🔹 Step 9: Remove Access
+In folder IAM:
+Remove the test user
+Check project IAM
+
+👉 User will lose access everywhere
+
+🎯 Key Concepts (Very Important for Exams)
+Folder IAM applies to all child projects
+IAM follows hierarchical structure
+Inheritance reduces manual permission management
+Always follow least privilege principle
