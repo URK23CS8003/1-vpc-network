@@ -1,0 +1,158 @@
+🧪 LAB 1: Create VM without External IP + Private Google Access
+✅ Task 1: Create VPC & Subnet (Enable Private Google Access)
+Step 1: Go to VPC
+Open Google Cloud Console
+Navigate → VPC Network → VPC networks
+Click Create VPC Network
+Step 2: Configure VPC
+Name: private-vpc
+Subnet mode: Custom
+Step 3: Create Subnet
+Name: private-subnet
+Region: (e.g.) us-central1
+IP Range: 10.0.0.0/24
+
+👉 IMPORTANT:
+
+Enable ✅ Private Google Access
+
+Click Done → Create
+
+✅ Task 2: Create VM WITHOUT External IP
+Step 4: Create VM
+Go to Compute Engine → VM instances
+Click Create Instance
+Step 5: Configure VM
+Name: vm-private
+Region: same as subnet (us-central1)
+Machine type: e2-medium
+OS: Debian 12
+Step 6: Networking (Important)
+Click Networking
+Select:
+Network: private-vpc
+Subnet: private-subnet
+❌ External IP: Select None
+Step 7: Create VM
+Click Create
+✅ Result
+VM created without external IP
+Can access Google APIs securely via Private Google Access
+🎯 Key Concept
+
+👉 Private Google Access allows VM (no external IP) to:
+
+Access Google services (Cloud Storage, APIs)
+Without using internet/public IP
+
+
+🧪 LAB 2: Working with Virtual Machines (Minecraft Server)
+✅ Task 1: Create VM with Extra Disk
+Step 1: Create VM
+Go to Compute Engine → VM instances
+Click Create Instance
+Step 2: Configure VM
+Name: mc-server
+Machine type: e2-medium
+OS: Debian 12
+Step 3: Add Disk
+Click Add new disk
+Name: minecraft-disk
+Type: SSD
+Size: 50 GB
+Click Save
+Step 4: Networking
+Add Network tag: minecraft-server
+Reserve Static External IP
+Step 5: Create VM
+✅ Task 2: Format & Mount Disk
+
+SSH into VM:
+
+sudo mkdir -p /home/minecraft
+
+Format disk:
+
+sudo mkfs.ext4 -F /dev/disk/by-id/google-minecraft-disk
+
+Mount disk:
+
+sudo mount /dev/disk/by-id/google-minecraft-disk /home/minecraft
+✅ Task 3: Install Minecraft Server
+Step 6: Install Java
+sudo apt-get update
+sudo apt-get install -y default-jre-headless
+Step 7: Download Server
+cd /home/minecraft
+sudo apt-get install wget
+sudo wget https://launcher.mojang.com/v1/objects/.../server.jar
+Step 8: Start Server
+sudo java -Xmx1024M -Xms1024M -jar server.jar nogui
+Step 9: Accept EULA
+sudo nano eula.txt
+
+Change:
+
+eula=false → eula=true
+✅ Task 4: Run Server in Background
+Step 10: Install Screen
+sudo apt-get install -y screen
+Step 11: Run Server
+sudo screen -S mcs java -Xmx1024M -Xms1024M -jar server.jar nogui
+
+Detach:
+
+Ctrl + A + D
+✅ Task 5: Allow Game Traffic
+Step 12: Create Firewall Rule
+Go to VPC → Firewall
+Click Create Rule
+
+Config:
+
+Name: minecraft-rule
+Target: minecraft-server
+Source: 0.0.0.0/0
+Port: tcp:25565
+
+Click Create
+
+✅ Task 6: Backup Setup
+Step 13: Create Bucket
+export YOUR_BUCKET_NAME=your-unique-name
+gcloud storage buckets create gs://$YOUR_BUCKET_NAME-minecraft-backup
+Step 14: Create Backup Script
+sudo nano /home/minecraft/backup.sh
+
+Paste:
+
+#!/bin/bash
+/usr/bin/gcloud storage cp -R /home/minecraft/world gs://$YOUR_BUCKET_NAME-minecraft-backup/
+
+Make executable:
+
+sudo chmod 755 /home/minecraft/backup.sh
+Step 15: Schedule Cron Job
+sudo crontab -e
+
+Add:
+
+0 */4 * * * /home/minecraft/backup.sh
+✅ Task 7: Stop Server
+sudo screen -r -X stuff '/stop\n'
+
+Then:
+
+Go to VM → Click Stop
+🎯 Final Outcome
+Lab 1:
+
+✔ VM without external IP
+✔ Secure API access via Private Google Access
+
+Lab 2:
+
+✔ Minecraft server deployed
+✔ Persistent disk attached
+✔ Firewall configured
+✔ Backup automated
