@@ -1,0 +1,122 @@
+1. VPC Networking
+Design and configure a Custom Mode VPC by creating subnets in us-central1 and asia-
+east1 regions to support multi- region networking. (3)
+Activity 3: Essential Google Cloud Infrastructure: Foundation
+Lab: VPC Networking
+
+✅ Task 1: Create Custom Mode VPC (Multi-Region)
+Step 1: Open VPC Network
+Go to Google Cloud Console
+Navigate → VPC network → VPC networks
+Click Create VPC Network
+Step 2: Configure VPC
+Name: custom-vpc
+Subnet mode: ✅ Custom
+Step 3: Create Subnet (Region 1 – us-central1)
+Click Add Subnet
+Name: subnet-us
+Region: us-central1
+IP range: 10.0.1.0/24
+Click Done
+Step 4: Create Subnet (Region 2 – asia-east1)
+Click Add Subnet
+Name: subnet-asia
+Region: asia-east1
+IP range: 10.0.2.0/24
+Click Done
+Step 5: Create VPC
+Click Create
+
+✔️ Now your Custom Mode VPC with multi-region subnets is ready.
+
+✅ Task 2: Create Firewall Rule
+Step 6: Go to Firewall
+Navigate → VPC network → Firewall
+Click Create Firewall Rule
+Step 7: Configure Rule
+Name: allow-ssh-icmp
+Network: custom-vpc
+Direction: Ingress
+Action: Allow
+Targets: All instances
+Source IP: 0.0.0.0/0
+Protocols:
+✔️ tcp:22 (SSH)
+✔️ icmp (Ping)
+
+Click Create
+
+✅ Task 3: Create VM Instances in Different Regions
+Step 8: Create VM in us-central1
+Go to Compute Engine → VM instances
+Click Create Instance
+
+Configuration:
+
+Name: vm-us
+Region: us-central1
+Zone: us-central1-a
+Machine type: e2-micro
+OS: Debian 12
+
+👉 Networking:
+
+Network: custom-vpc
+Subnet: subnet-us
+
+Click Create
+
+Step 9: Create VM in asia-east1
+
+Repeat steps:
+
+Configuration:
+
+Name: vm-asia
+Region: asia-east1
+Zone: asia-east1-a
+
+👉 Networking:
+
+Network: custom-vpc
+Subnet: subnet-asia
+
+Click Create
+
+✅ Task 4: Test Connectivity
+Step 10: SSH into VM
+
+Open Cloud Shell and run:
+
+gcloud compute ssh vm-us --zone=us-central1-a
+Step 11: Ping Other VM (Internal IP)
+
+Inside VM:
+
+ping -c 3 <vm-asia-internal-ip>
+
+✔️ You should get successful response
+
+✅ Expected Result
+VPC created in Custom mode
+Subnets in:
+us-central1
+asia-east1
+2 VMs created in different regions
+Internal communication works (ping success)
+🎯 Key Concepts (Important for Exam)
+Custom Mode VPC: Full control over subnets
+Multi-region networking: Same VPC across regions
+Internal IP communication works across regions
+Firewall rules required for access
+⚡ Quick Answer (3 Mark Format)
+
+Design a Custom Mode VPC by:
+
+Creating VPC with Custom subnet mode
+Adding subnets in:
+us-central1 → 10.0.1.0/24
+asia-east1 → 10.0.2.0/24
+Creating firewall rules (SSH + ICMP)
+Launching VMs in each subnet
+Verifying connectivity using ping
