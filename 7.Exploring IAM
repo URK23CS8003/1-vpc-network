@@ -1,0 +1,172 @@
+7. Exploring IAM
+Create a second “Test User” in IAM and assign him the Storage Object Viewer role for a
+specific bucket.
+Activity 4: Essential Google Cloud Infrastructure: Core Services
+Lab: Exploring IAM
+
+✅ PART 1: Start Lab & Login
+Click Start Lab
+Click Open Google Cloud Console
+Login using:
+Username 1
+Password
+Open another tab (Incognito)
+→ Login with Username 2
+
+👉 Now you have:
+
+Tab 1 → Username 1 (Admin)
+Tab 2 → Username 2 (Test User)
+✅ PART 2: Explore IAM
+In Username 1 tab:
+Go to ☰ Navigation Menu
+Click IAM & Admin → IAM
+Click Grant Access
+Observe available roles (Viewer, Editor, Storage roles, etc.)
+Click Cancel
+In Username 2 tab:
+Go to IAM & Admin → IAM
+Notice:
+Has Viewer role
+Cannot edit permissions ❌
+✅ PART 3: Create Storage Bucket
+In Username 1 tab:
+Go to Cloud Storage → Buckets
+Click Create
+Enter:
+Bucket name → (unique name, e.g. my-bucket-12345)
+Location type → Multi-region
+Click Create
+✅ Upload File
+Click Upload → Upload file
+Select any file from your system
+After upload:
+Click ⋮ (3 dots) → Rename
+Rename to: sample.txt
+✅ Verify Access (Username 2)
+Switch to Username 2 tab
+Go to Cloud Storage → Buckets
+✅ You should see the bucket
+❌ PART 4: Remove Project Access
+In Username 1 tab:
+Go to IAM & Admin → IAM
+Find Username 2
+Click Remove Access
+Click Confirm
+Verify (Username 2):
+Refresh page
+Try opening:
+Cloud Storage
+❌ You will get permission error
+✅ PART 5: Give Storage Object Viewer Role (IMPORTANT)
+In Username 1 tab:
+Go to IAM & Admin → IAM
+Click Grant Access
+Enter:
+New principal → Username 2 email
+Select role:
+Cloud Storage → Storage Object Viewer
+Click Save
+✅ Verify Limited Access (Username 2)
+Switch to Username 2 tab
+Open Cloud Shell
+Run:
+gcloud storage ls gs://YOUR_BUCKET_NAME
+
+👉 Output: Bucket contents visible ✅
+
+⚠️ Note:
+
+Cannot see full project
+Can only access storage objects
+✅ PART 6: Create Service Account
+In Username 1 tab:
+Go to IAM & Admin → Service Accounts
+Click Create Service Account
+Enter:
+Name → read-bucket-objects
+Click Create and Continue
+Assign role:
+Storage Object Viewer
+Click Done
+✅ PART 7: Grant Service Account User Role
+Click your service account
+Click Manage Permissions
+Click Grant Access
+Enter:
+altostrat.com
+Role:
+Service Accounts → Service Account User
+Click Save
+✅ PART 8: Give Compute Admin Role
+Go to IAM
+Click Grant Access
+Enter:
+altostrat.com
+Role:
+Compute Engine → Compute Instance Admin (v1)
+Click Save
+✅ PART 9: Create VM with Service Account
+Go to Compute Engine → VM Instances
+Click Create Instance
+
+Fill:
+
+Name → demoiam
+Machine → e2-micro
+OS → Debian 12
+Security section:
+Service account → read-bucket-objects
+Access scope → Set access for each API
+Storage → Read/Write
+
+Click Create
+
+✅ PART 10: Test Permissions (VERY IMPORTANT)
+SSH into VM:
+Click SSH
+❌ Try listing instances:
+gcloud compute instances list
+
+👉 ERROR → No permission
+
+✅ Download file:
+gcloud storage cp gs://YOUR_BUCKET_NAME/sample.txt .
+Rename file:
+mv sample.txt sample2.txt
+❌ Upload (will fail):
+gcloud storage cp sample2.txt gs://YOUR_BUCKET_NAME
+
+👉 ERROR → No write permission
+
+✅ PART 11: Fix Permission
+In Username 1 tab:
+Go to IAM
+Find service account
+Click Edit
+Change role to:
+Storage Object Creator
+Click Save
+✅ PART 12: Retry Upload
+
+Back in SSH:
+
+gcloud storage cp sample2.txt gs://YOUR_BUCKET_NAME
+
+👉 ✅ SUCCESS
+
+🎯 FINAL RESULT
+
+You successfully:
+✔ Created Test User
+✔ Removed project access
+✔ Gave limited Storage access only
+✔ Created Service Account
+✔ Tested real IAM permissions
+✔ Fixed permission issue
+
+💡 Quick Concept (Exam Tip)
+Viewer → Read everything
+Storage Object Viewer → Read only storage
+Storage Object Creator → Upload allowed
+IAM controls access 🔐
