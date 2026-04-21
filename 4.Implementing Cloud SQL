@@ -1,0 +1,148 @@
+4. Implementing Cloud SQL
+Deploy a managed Cloud SQL (MySQL) instance and configure database setting to
+support scalable and reliable application for data storage. (2)
+Activity 4: Essential Google Cloud Infrastructure: Core Services
+Lab: Implementing Cloud SQL   
+Here’s a clear, step-by-step guide to complete your
+🧪 Lab 4: Implementing Cloud SQL (WordPress + Proxy + Private IP) 👇
+
+🧪 PART 1: Create Cloud SQL (MySQL) Instance
+✅ Step 1: Open Cloud SQL
+Go to Google Cloud Console
+Navigate → Cloud SQL
+Click Create Instance
+✅ Step 2: Choose Database
+Select MySQL
+Edition: Enterprise
+Version: MySQL 8.0
+✅ Step 3: Configure Instance
+Instance ID: wordpress-db
+Root Password: Passw0rd1! (or your own)
+Region: same as lab
+Zone: Single zone
+✅ Step 4: Machine Configuration
+Choose:
+General Purpose
+1 vCPU, 3.75 GB RAM
+✅ Step 5: Storage
+Type: SSD
+Size: 10 GB
+✅ Step 6: Enable Private IP
+Go to Connections
+Select:
+✅ Private IP
+Network: default
+Click Confirm network setup
+✅ Step 7: Security
+Enable:
+✅ Allow unencrypted connections
+✅ Step 8: Create Instance
+Click Create
+⏳ Wait until green check appears
+🧪 PART 2: Create Database inside SQL
+✅ Step 9: Create Database
+Open wordpress-db
+Go to Databases
+Click Create Database
+
+Enter:
+
+Name: wordpress
+
+Click Create
+
+🧪 PART 3: Configure Cloud SQL Proxy (External Connection)
+✅ Step 10: Open VM
+Go to Compute Engine → VM instances
+Click SSH for:
+👉 wordpress-proxy
+✅ Step 11: Install Proxy
+wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
+chmod +x cloud_sql_proxy
+✅ Step 12: Get Connection Name
+Go to Cloud SQL → wordpress-db
+Copy Instance Connection Name
+✅ Step 13: Set Variable
+export SQL_CONNECTION=your-connection-name
+
+Check:
+
+echo $SQL_CONNECTION
+✅ Step 14: Start Proxy
+./cloud_sql_proxy -instances=$SQL_CONNECTION=tcp:3306 &
+
+✔️ Output:
+
+Listening on 127.0.0.1:3306
+🧪 PART 4: Connect WordPress (Using Proxy)
+✅ Step 15: Get External IP
+curl -H "Metadata-Flavor: Google" \
+http://169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip
+✅ Step 16: Open Browser
+
+👉 Go to:
+
+http://<wordpress-proxy-EXTERNAL-IP>
+✅ Step 17: Configure WordPress
+
+Enter:
+
+Field	Value
+Database	wordpress
+Username	root
+Password	your root password
+Host	127.0.0.1
+
+Click:
+➡️ Submit → Run Installation
+
+✅ Step 18: Finish Setup
+Enter any:
+Site name
+Username
+Password
+
+✔️ WordPress site created
+
+🧪 PART 5: Connect via Private IP (More Secure)
+✅ Step 19: Get Private IP
+Go to Cloud SQL → wordpress-db
+Copy Private IP
+✅ Step 20: Open Second VM
+Go to Compute Engine
+Open:
+👉 wordpress-private-ip
+✅ Step 21: Open Website
+
+👉 In browser:
+
+http://<wordpress-private-ip-EXTERNAL-IP>
+✅ Step 22: Configure WordPress (Private IP)
+
+Enter:
+
+Field	Value
+Database	wordpress
+Username	root
+Password	same password
+Host	<SQL_PRIVATE_IP>
+
+Click:
+➡️ Submit
+
+✅ Step 23: Result
+
+✔️ Shows:
+👉 “Already Installed!”
+
+✔️ Means:
+
+Connected successfully via Private IP
+🎯 FINAL OUTPUT
+
+✔ Cloud SQL instance created
+✔ Database configured
+✔ WordPress connected via:
+
+Proxy (External method)
+Private IP (Internal secure method)
