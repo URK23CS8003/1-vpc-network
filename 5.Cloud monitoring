@@ -1,0 +1,156 @@
+Here’s a clear, step-by-step guide to complete your
+Cloud Monitoring: Qwik Start Lab (Activity 8) 👇
+
+✅ Step-by-Step Procedure
+🔹 Step 1: Start Lab & Login
+Click Start Lab
+Open Google Cloud Console
+Login using:
+Username (given)
+Password (given)
+Accept terms → Skip recovery options
+🔹 Step 2: Activate Cloud Shell
+Click Activate Cloud Shell (top-right)
+Click Continue → Authorize
+🔹 Step 3: Set Region & Zone
+
+Run these commands:
+
+gcloud config set compute/zone "ZONE"
+export ZONE=$(gcloud config get compute/zone)
+
+gcloud config set compute/region "REGION"
+export REGION=$(gcloud config get compute/region)
+🔹 Step 4: Create VM Instance
+Go to Compute Engine → VM Instances
+Click Create Instance
+Enter details:
+Field	Value
+Name	lamp-1-vm
+Region	Given REGION
+Zone	Given ZONE
+Series	E2
+Machine Type	e2-medium
+Click OS and Storage
+Select Debian GNU/Linux 12
+Click Networking
+Enable Allow HTTP traffic
+Click Create
+
+✅ Wait until green tick appears
+
+🔹 Step 5: Install Apache Web Server
+Click SSH for lamp-1-vm
+Run commands:
+sudo apt-get update
+sudo apt-get install apache2 php7.0
+sudo service apache2 restart
+
+👉 If php7.0 fails:
+
+sudo apt-get install apache2 php5
+🔹 Step 6: Verify Web Server
+Go back to VM list
+Click External IP
+You should see:
+👉 Apache default page
+🔹 Step 7: Open Cloud Monitoring
+Go to:
+Navigation Menu → Monitoring
+Monitoring workspace auto-creates
+🔹 Step 8: Install Monitoring & Logging Agents
+Run in SSH:
+curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh
+sudo bash add-google-cloud-ops-agent-repo.sh --also-install
+
+👉 Press Y if asked
+
+Check status:
+
+sudo systemctl status google-cloud-ops-agent"*"
+
+Press q to exit
+
+🔹 Step 9: Create Uptime Check
+Go to Monitoring → Uptime checks
+Click Create Uptime Check
+Enter:
+Field	Value
+Protocol	HTTP
+Resource Type	URL
+Hostname	External IP of VM
+Frequency	1 minute
+Click Continue → Continue → Continue
+Name: Lamp Uptime Check
+Click Test → Create
+🔹 Step 10: Create Alerting Policy
+Go to Monitoring → Alerting
+Click + Create Policy
+Configure Metric:
+Click Select Metric
+Search: Network traffic
+
+Choose:
+
+VM instance → Interface → Network traffic
+Click Next
+Set Condition:
+Threshold: Above
+Value: 500
+Retest window: 1 min
+Click Next
+Add Notification (Email):
+Click Manage Notification Channels
+Add:
+Email address
+Display name
+Save
+Refresh → Select your email
+Final:
+Alert Name: Inbound Traffic Alert
+Click Create Policy
+🔹 Step 11: Create Dashboard
+Go to Monitoring → Dashboards
+Click Create Dashboard
+Name:
+👉 Cloud Monitoring LAMP Dashboard
+Add Chart 1 (CPU):
+Click Add Widget → Line
+Title: CPU Load
+
+Metric:
+
+VM instance → CPU → CPU load (1m)
+Add Chart 2 (Packets):
+Click Add Widget
+Title: Received Packets
+
+Metric:
+
+VM instance → Received packets
+🔹 Step 12: View Logs
+Go to:
+Navigation → Logging → Logs Explorer
+Select:
+Resource: VM Instance
+Instance: lamp-1-vm
+🔹 Step 13: Test Logs (Stop & Start VM)
+Stop VM:
+Go to Compute Engine
+Click 3 dots → Stop
+Start VM:
+Click Start
+
+👉 Watch logs update in real time
+
+🔹 Step 14: Check Uptime & Alerts
+Go to Monitoring → Uptime Checks
+Open Lamp Uptime Check
+
+👉 Initially may show failed, wait 2–5 minutes
+
+Check Alerts:
+Go to Monitoring → Alerting
+See incidents
+
+📧 Check your email → alert received
